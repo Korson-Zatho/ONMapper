@@ -1,3 +1,4 @@
+package api;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.InputStreamReader;
@@ -114,5 +115,10 @@ public class ONHttpsClient {
 
 		//return the response as a String
 		return new HttpsResponse(responseCode, response.toString());
-	}	
+	}
+	
+	public void openONContent(String querry, String accessToken, String contentType) throws Exception
+	{
+		
+	}
 }
