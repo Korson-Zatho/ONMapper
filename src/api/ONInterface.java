@@ -2,19 +2,28 @@ package api;
 
 import java.util.ArrayList;
 
+import Exceptions.InvalidStateException;
 import ONData.ONData;
 
 public interface ONInterface {
 	
 	/**
-	 * Starts the authorization process which will open the standard-browser in
-	 * order to allow the user to log in with his Microsoft-account and accept the
-	 * scope of access our program needs to operate. After that has been done the
-	 * API-branch will go into datacollection mode.
-	 * 
-	 * @return true if authorization as successful and false if it has not been successful
+	 * Starts the authorization process. The standard Webbrowser will open to allow the user
+	 * to log in with his Microsoft-account and accept the scope of access our program needs
+	 * to operate. After this has been done please call authorize(String uri) with the URI that
+	 * the user has received in his browser tab.
 	 */
-	public boolean authorize();
+	public void login();
+	
+	
+	/**
+	 * Checks the URI for the accessCode and reviews the status of the Request
+	 * After that has been done successfully the API-branch will go into datacollection mode.
+	 * @return true if authorization as successful and false if it has not been successful
+	 * @throws InvalidStateException 
+	 * @throws Exception 
+	 */
+	public boolean authorize(String uri) throws InvalidStateException, Exception;
 	
 	/**
 	 * Needs to be called after authorize and given a notebook id in order to access Data
@@ -33,4 +42,12 @@ public interface ONInterface {
 	 * @param content
 	 */
 	public void openContent(ONData content);
+	
+	/**
+	 *\\BOOKMARK\\
+	 * 
+	 * @param pageName -> Name of the Page that is to be searched for.
+	 * @return A List of ONData Entities which represent Pages with a fitting Name.
+	 */
+	public ArrayList<ONData> searchPage(String pageName);
 }
