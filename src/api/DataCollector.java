@@ -8,7 +8,7 @@ public class DataCollector {
 	
 	/**
 	 * 
-	 * @param response
+	 * @param response The HttpsResponse from the Azure AD Authorize endpoint
 	 * @return Filters the authorizationToken from the HttpsResponse
 	 */
 	public String parseAuthorizationToken(HttpsResponse response) throws BadResponseException
@@ -26,7 +26,8 @@ public class DataCollector {
 	
 	/**
 	 * 
-	 * @return the authorizationCode in the Query
+	 * @return A HashMap<String,String> which has the name of the variable as the Key and 
+	 * the Value of the variable as Value.
 	 */
 	public HashMap<String,String> resolveQuery(String uri)
 	{
@@ -48,6 +49,11 @@ public class DataCollector {
 		return variableMap;
 	}
 	
+	/**
+	 * 
+	 * @return A query String which needs to be attached to the standard Uri to get the 
+	 * JSON response with content that matches the query.
+	 */
 	public String buildQuerry()
 	{
 		return null;
