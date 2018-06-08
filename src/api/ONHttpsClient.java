@@ -117,8 +117,9 @@ public class ONHttpsClient {
 		return new HttpsResponse(responseCode, response.toString());
 	}
 	
-	public void openONContent(String querry, String accessToken, String contentType) throws Exception
+	public void openONContent(String url, Desktop desktop) throws Exception
 	{
-		
+		URI uri = new URI(url);
+		desktop.browse(uri);
 	}
 }

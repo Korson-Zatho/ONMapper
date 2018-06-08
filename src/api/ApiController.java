@@ -58,7 +58,8 @@ public class ApiController implements ONInterface
 	@Override
 	public ArrayList<ONData> getNotebooks() {
 		try {
-			client.getONContent("/notebooks", accessToken, "application/json");
+			HttpsResponse response = client.getONContent("/notebooks", accessToken, "json");	
+			return DataCollector.parseJSON(response);
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.out.println(e.getMessage());
@@ -68,8 +69,11 @@ public class ApiController implements ONInterface
 
 	@Override
 	public void openContent(ONData content) {
-		// TODO Auto-generated method stub
-		
+		try {
+			client.openONContent(content.getLinkUri(), desktop);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override

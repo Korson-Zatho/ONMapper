@@ -1,39 +1,23 @@
 package ONData;
 
-import Exceptions.BadValueException;
-
 public class ONData {
 	
 	private final String id;
 	private final String name;
-	private final String type;
 	private final String linkUri;
 	
-	ONData(String id, String name, String type) throws BadValueException
+	/**
+	 * 
+	 * @param id
+	 * @param name
+	 * @param type
+	 * @param linkUri
+	 * @throws BadValueException
+	 */
+	public ONData(String id, String name, String linkUri)
 	{
 		this.id = id;
 		this.name = name;
-		if (type == "notebooks" || type == "sections" || type == "pages")
-		{
-			this.type = type;
-		}	else	{
-			throw new BadValueException("Value was: " + type + " , but should have been"
-										 + "\"notebooks\", \"pages\" or \"sections\"");
-		}
-		this.linkUri = null;
-	}
-	
-	ONData(String id, String name, String type, String linkUri) throws BadValueException
-	{
-		this.id = id;
-		this.name = name;
-		if (type == "notebooks" || type == "pages")
-		{
-			this.type = type;
-		}	else	{
-			throw new BadValueException("Value was: " + type + " , but should have been"
-										 + "\"notebooks\", \"pages\"");
-		}
 		this.linkUri = linkUri;
 	}
 	
@@ -51,15 +35,6 @@ public class ONData {
 	public String getName()
 	{
 		return name;
-	}
-	
-	/**
-	 * 
-	 * @return The type of this ONData-Entity can be ("notebooks", "sections", "pages")
-	 */
-	public String getType()
-	{
-		return type;
 	}
 	
 	/**
