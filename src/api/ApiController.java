@@ -21,6 +21,8 @@ public class ApiController implements ONInterface
 		collector = new DataCollector();
 	}
 	
+	
+	
 	@Override
 	public void login()
 	{
@@ -31,6 +33,7 @@ public class ApiController implements ONInterface
 			System.out.println(e.getMessage());
 		}
 	}
+	
 	
 	
 	@Override
@@ -49,17 +52,20 @@ public class ApiController implements ONInterface
 	}
 
 	
+	
 	@Override
 	public void initializeNotebook(ONData notebook) {
 		// TODO Auto-generated method stub
 		
 	}
 
+	
+	
 	@Override
 	public ArrayList<ONData> getNotebooks() {
 		try {
 			HttpsResponse response = client.getONContent("/notebooks", accessToken, "json");	
-			return DataCollector.parseJSON(response);
+			return collector.createONData(collector.parseJSON(response));
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.out.println(e.getMessage());
@@ -67,6 +73,8 @@ public class ApiController implements ONInterface
 		return null;
 	}
 
+	
+	
 	@Override
 	public void openContent(ONData content) {
 		try {
@@ -76,6 +84,8 @@ public class ApiController implements ONInterface
 		}
 	}
 
+	
+	
 	@Override
 	public ArrayList<ONData> searchPage(String pageName) {
 		// TODO Auto-generated method stub

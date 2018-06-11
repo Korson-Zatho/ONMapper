@@ -2,6 +2,7 @@ package api;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 
 import Exceptions.*;
 import ONData.ONData;;
@@ -25,6 +26,8 @@ public class DataCollector {
 		
 		return keyValue[4];
 	}
+	
+	
 	
 	/**
 	 * 
@@ -51,22 +54,43 @@ public class DataCollector {
 		return variableMap;
 	}
 	
+	
+	
 	/**
+	 * Builds Query which allows filtering of pages by a name and 
+	 * gets specified selectParameters in the JSON-Response
 	 * 
-	 * @return A query String which needs to be attached to the standard Uri to get the 
+	 * @param name :The name which should be filtered with,
+	 * @param selectParameters :The parameters that should be selected by the JSON-Response
+	 * @return A query String which needs to be attached to the standard URI to get the 
 	 * JSON response with content that matches the query.
 	 */
-	public String buildQuerry()
+	public String buildPageFilterQuery(String name, String[] selectParameters)
 	{
-		return null;
+		StringBuffer query = new StringBuffer("/pages?filter=title%20eq%20'" + name + "'&select=");
+		
+		if (selectParameters.length != 0) {
+			query.append(selectParameters[0]);
+			for (int i = 1; i < selectParameters.length; i++)
+			{
+				query.append("," + selectParameters[i]);
+			}
+		}
+		return query.toString();
 	}
 	
+	
+	
+	// WARNING: DEPRICATED IS NOT USEFULL ANYMORE.
+	// SHOULD BE TURNED INTO A PARSER RETURNING A LIST OF HASHMAPS WITH ALL VARIABLE VALUE PAIRS
+	// FOR EACH PAGE/NOTEBOOK
 	/**
 	 * Parses a JSON returned from Microsoft Graph after a Post request has been made
 	 * It creates an ArrayList of ONData which then represent the returned content in our program
+	 * @param response The HttpsResponse entity which contents is to be parsed.
 	 * @return ArrayList<ONData> Which are all the content that were sent by Microsoft Graph as a response
 	 */
-	public static ArrayList<ONData> parseJSON(HttpsResponse response)
+	public ArrayList<ONData> parseJSONold(HttpsResponse response)
 	{
 		//Split the JSON into Strings which each represent 1 ONData entity
 		String data = response.getResponseString().split("[")[1];
@@ -88,15 +112,68 @@ public class DataCollector {
 		return onDataEntities;
 	}
 	
+	
+	
 	/**
-	 * 
-	 * @return
+	 * Filters the ClientUrlLink form the link variable in a JSON-Response from Microsoft-Graph
+	 * @return The ClientUrlLink from a JSON of a Page or a Notebook
 	 */
-	public static String parseLinkUrl(String jsonLinks)
+	public String parseLinkUrl(String jsonLinks)
 	{
 		//Clean the String from '{', '}', '"' and then split at ":" which will split the String into "link" | "oneNoteClientUrl" | "href" | the ONClientUri we are looking for | Rest
 		//Meaning we will have to return the String at third place to get the oneNoteClientUrl we are looking for
 		String[] data = jsonLinks.replaceAll("\\{|\\}|\"", "").split(":");	
 		return data[3];
+	}
+	
+	
+	
+	public ArrayList<HashMap<String,String>> parseJSON(HttpsResponse response)
+	{
+		//Split the JSON into Strings which each represent 1 ONData entity
+		String data = response.getResponseString().split("[")[1];
+		String[] onDataStrings = data.split("}},{");
+				
+		//Now split each of those representative Strings into their variable-value pair
+		//And create a new List of HashMaps to store them in to be returned.
+		ArrayList<HashMap<String,String>> hashList = new ArrayList<HashMap<String,String>>();
+		for (int i = 0; i < onDataStrings.length; i++)
+		{
+			//Clean each String from '{', '}', '"' and then split the variable-value pairs
+			String[] variableValuePairs = onDataStrings[i].replaceAll("\\{|\\}|\"", "").split(",");	
+			
+			//create a new HashMap object for the array of variable-value pairs
+			//then go through each entry of variableValuePairs and split at ":"
+			//then put the split Key-Value pair into the HashMap as Key and Value
+			HashMap<String,String> map = new HashMap<String,String>();
+			for (int j = 0; j < variableValuePairs.length; j++)
+				{
+					String[] split = variableValuePairs[j].split(":");
+					map.put(split[0], split[1]);
+				}
+			//Add the HashMap to the ArrayList
+			hashList.add(i, map);
+		}	
+		return hashList;
+	}
+	
+	
+	
+	/**
+	 * Turns Variable-Value pairs in the form of HashMaps into ONData entities.
+	 * This Method should be called after a HttpsResponse was parsed to get ONData
+	 * that can be used for later purposes.
+	 * 
+	 * @param keyValue A List of HashMap<String,String> objects which you want to turn into ONData objects.
+	 * @return ArrayList of ONData entities
+	 */
+	public ArrayList<ONData> createONData(ArrayList<HashMap<String,String>> keyValueMap)
+	{
+		ArrayList<ONData> dataList = new ArrayList<ONData>();
+		for (Iterator<HashMap<String,String>> e = keyValueMap.iterator(); e.hasNext(); ) {
+			HashMap<String,String> element = e.next();
+			dataList.add(new ONData(element.get("id"), element.get("name"), element.get("linkUri")));
+		}
+		return dataList;
 	}
 }
