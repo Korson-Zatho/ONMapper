@@ -23,7 +23,7 @@ public class ONHttpsClient {
 											+ "&state=12345";
 	
 	private final String accessTokenUri = "https://login.microsoftonline.com/consumers/oauth2/v2.0/token";
-	private final String serviceRootUri = "https://graph.microsoft.com/v1.0";
+	private final String serviceRootUri = "https://graph.microsoft.com/v1.0/me/onenote";
 	
 	
 	

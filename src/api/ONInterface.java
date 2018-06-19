@@ -16,6 +16,7 @@ public interface ONInterface {
 	public void login();
 	
 	
+	
 	/**
 	 * Checks the URI for the accessCode and reviews the status of the Request
 	 * After that has been done successfully the API-branch will go into datacollection mode.
@@ -25,11 +26,15 @@ public interface ONInterface {
 	 */
 	public boolean authorize(String uri) throws InvalidStateException, Exception;
 	
+	
+	
 	/**
 	 * Needs to be called after authorize and given a notebook id in order to access Data
 	 * @param id of the notebook to be searched for content
 	 */
 	public void initializeNotebook(ONData notebook);
+	
+	
 	
 	/**
 	 * Use this to to get the ONData instances needed to call initializeNotebook
@@ -37,11 +42,15 @@ public interface ONInterface {
 	 */
 	public ArrayList<ONData> getNotebooks();
 	
+	
+	
 	/**
 	 * Opens a OneNoteClient with content as the presented page/section/notebook
 	 * @param content
 	 */
 	public void openContent(ONData content);
+	
+	
 	
 	/**
 	 *\\BOOKMARK\\

@@ -1,5 +1,7 @@
 package api;
 
+import static org.junit.jupiter.api.Assumptions.assumingThat;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -9,8 +11,11 @@ import ONData.ONData;;
 
 public class DataCollector {
 	
+	private String notebookQuery;
+	
 	/**
-	 * 
+	 * Parses the Response when requesting an authorization token 
+	 * Builds HashMap so can be used to return all keyValuePairs sent by Microsoft not just the token
 	 * @param response The HttpsResponse from the Azure AD Authorize endpoint
 	 * @return Filters the authorizationToken from the HttpsResponse
 	 */
@@ -20,11 +25,16 @@ public class DataCollector {
 		{
 			throw new BadResponseException("Responsecode:" + response.getResponseCode());
 		}
-		
-		
-		String[] keyValue = response.getResponseString().split("\"");
-		
-		return keyValue[4];
+//		String[] keyValue = response.getResponseString().split("\"");
+		String content = response.getResponseString().replaceAll("\\{|\\}|\"", "");
+		String[] keyValuePairs = content.split(",");
+		HashMap<String,String> map = new HashMap<String,String>();
+		for (int i = 0; i < keyValuePairs.length; i++)
+		{
+			String[] splitPairs = keyValuePairs[i].split(":");
+			map.put(splitPairs[0], splitPairs[1]);
+		}
+		return map.get("access_token");
 	}
 	
 	
@@ -37,7 +47,7 @@ public class DataCollector {
 	public HashMap<String,String> resolveQuery(String uri)
 	{
 		//Select the Query of the URI
-		String query = uri.split("?")[1];
+		String query = uri.split("\\?")[1];
 		
 		//Split the Query into all the 'key'='value' Strings
 		String[] variables = query.split("&");
@@ -50,7 +60,6 @@ public class DataCollector {
 			String[] pair = variables[i].split("=");
 			variableMap.put(pair[0], pair[1]);
 		}
-		
 		return variableMap;
 	}
 	
@@ -65,18 +74,9 @@ public class DataCollector {
 	 * @return A query String which needs to be attached to the standard URI to get the 
 	 * JSON response with content that matches the query.
 	 */
-	public String buildPageFilterQuery(String name, String[] selectParameters)
+	public String buildPageFilterQuery(String name, String selectParameters)
 	{
-		StringBuffer query = new StringBuffer("/pages?filter=title%20eq%20'" + name + "'&select=");
-		
-		if (selectParameters.length != 0) {
-			query.append(selectParameters[0]);
-			for (int i = 1; i < selectParameters.length; i++)
-			{
-				query.append("," + selectParameters[i]);
-			}
-		}
-		return query.toString();
+		return (notebookQuery + "/pages?filter=title%20eq%20'" + name + "'&select=" + selectParameters);
 	}
 	
 	
@@ -93,7 +93,7 @@ public class DataCollector {
 	public ArrayList<ONData> parseJSONold(HttpsResponse response)
 	{
 		//Split the JSON into Strings which each represent 1 ONData entity
-		String data = response.getResponseString().split("[")[1];
+		String data = response.getResponseString().split("\\[")[1];
 		String[] onDataStrings = data.split("}},{");
 		
 		//Now split each of those representative Strings into their variable-value pair
@@ -131,8 +131,8 @@ public class DataCollector {
 	public ArrayList<HashMap<String,String>> parseJSON(HttpsResponse response)
 	{
 		//Split the JSON into Strings which each represent 1 ONData entity
-		String data = response.getResponseString().split("[")[1];
-		String[] onDataStrings = data.split("}},{");
+		String data = response.getResponseString().split("\\[")[1];
+		String[] onDataStrings = data.split("\\}\\},\\{");
 				
 		//Now split each of those representative Strings into their variable-value pair
 		//And create a new List of HashMaps to store them in to be returned.
@@ -140,7 +140,7 @@ public class DataCollector {
 		for (int i = 0; i < onDataStrings.length; i++)
 		{
 			//Clean each String from '{', '}', '"' and then split the variable-value pairs
-			String[] variableValuePairs = onDataStrings[i].replaceAll("\\{|\\}|\"", "").split(",");	
+			String[] variableValuePairs = onDataStrings[i].replaceAll("\\{|\\}|\"|\\]", "").split(",");	
 			
 			//create a new HashMap object for the array of variable-value pairs
 			//then go through each entry of variableValuePairs and split at ":"
@@ -149,8 +149,15 @@ public class DataCollector {
 			for (int j = 0; j < variableValuePairs.length; j++)
 				{
 					String[] split = variableValuePairs[j].split(":");
-					map.put(split[0], split[1]);
+					System.out.println(split[0] + split[1]);
+					if (split[0] == "links")	
+					{
+						map.put(split[0], parseLinkUrl(variableValuePairs[j]));
+					}	else	{
+						map.put(split[0], split[1]);
+					}
 				}
+			System.out.println(map.toString());
 			//Add the HashMap to the ArrayList
 			hashList.add(i, map);
 		}	
@@ -172,8 +179,26 @@ public class DataCollector {
 		ArrayList<ONData> dataList = new ArrayList<ONData>();
 		for (Iterator<HashMap<String,String>> e = keyValueMap.iterator(); e.hasNext(); ) {
 			HashMap<String,String> element = e.next();
-			dataList.add(new ONData(element.get("id"), element.get("name"), element.get("linkUri")));
+			for (Iterator<String> iter = element.keySet().iterator(); iter.hasNext();)
+			{
+				if (element.containsKey("links"))	{
+					dataList.add(new ONData(element.get(iter.next()), element.get(iter.next()), element.get(iter.next())));
+				} else {
+					dataList.add(new ONData(element.get(iter.next()), element.get(iter.next()), null));
+				}
+			}
 		}
+		System.out.println(dataList.get(0).toString());
 		return dataList;
+	}
+	
+	
+	public void setNotebookQuery(String notebookQuery)	{
+		this.notebookQuery = notebookQuery;
+	}
+	
+	public String getNotebookQuery()
+	{
+		return this.notebookQuery;
 	}
 }

@@ -9,12 +9,15 @@ import ONData.ONData;
 
 public class ApiController implements ONInterface
 {
-	ONHttpsClient client;
-	DataCollector collector;
-	Desktop desktop;
-	String accessToken;
+	private ONHttpsClient client;
+	private DataCollector collector;
+	private Desktop desktop;
+	private String accessToken;
+	private String pageSelectParameters = "id,title,links";
+	private String notebookSelectParameters = "id,name";
+	private String jsonContentType = "json";
 	
-	ApiController()
+	public ApiController()
 	{
 		client = new ONHttpsClient();
 		desktop = Desktop.getDesktop();
@@ -37,17 +40,16 @@ public class ApiController implements ONInterface
 	
 	
 	@Override
-	public boolean authorize(String uri) throws InvalidStateException, BadResponseException, Exception {
+	public boolean authorize(String uri) throws Exception {
 		//resolve the uri's query
 		HashMap<String, String> variableMap = collector.resolveQuery(uri);
-		
-		//## CHECK REQUEST STATUS ##//
-		
-		//## Maybe add a Try Catch Block to catch Exceptions due to Website inactivity etc. ##//
 		HttpsResponse response = client.requestAccessToken(variableMap.get("code"));
-		
-		collector.parseAuthorizationToken(response);
-		
+		if (response.getResponseCode() == 200)
+		{			
+			accessToken = collector.parseAuthorizationToken(response);
+			System.out.println(accessToken);
+			return true;			
+		}
 		return false;
 	}
 
@@ -55,8 +57,7 @@ public class ApiController implements ONInterface
 	
 	@Override
 	public void initializeNotebook(ONData notebook) {
-		// TODO Auto-generated method stub
-		
+		collector.setNotebookQuery("/notebooks/" + notebook.getID());
 	}
 
 	
@@ -64,7 +65,7 @@ public class ApiController implements ONInterface
 	@Override
 	public ArrayList<ONData> getNotebooks() {
 		try {
-			HttpsResponse response = client.getONContent("/notebooks", accessToken, "json");	
+			HttpsResponse response = client.getONContent("/notebooks?select=" + this.notebookSelectParameters , accessToken, this.jsonContentType);
 			return collector.createONData(collector.parseJSON(response));
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -88,8 +89,19 @@ public class ApiController implements ONInterface
 	
 	@Override
 	public ArrayList<ONData> searchPage(String pageName) {
-		// TODO Auto-generated method stub
-		return null;
+		String query = collector.buildPageFilterQuery(pageName, this.pageSelectParameters);
+		try {
+			return collector.createONData(collector.parseJSON(client.getONContent(query, this.accessToken, "json")));
+		} catch (Exception e) {
+			System.out.println(e.getMessage() + ": Some Problem uccured while interacting with Microsoft Graph");
+		}
+		return null; 
 	}
 
+	
+	//##GETTER METHODES''//-------------------------------------------------------------------------------------------------------
+	
+	public String getNotebookQuery()	{
+		return collector.getNotebookQuery();
+	}
 }

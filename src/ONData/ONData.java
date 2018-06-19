@@ -14,7 +14,7 @@ public class ONData {
 	 * @param linkUri
 	 * @throws BadValueException
 	 */
-	public ONData(String id, String name, String linkUri)
+	public ONData(String name, String id, String linkUri)
 	{
 		this.id = id;
 		this.name = name;
@@ -45,5 +45,10 @@ public class ONData {
 	public String getLinkUri()
 	{
 		return linkUri;
+	}
+	
+	public String toString()
+	{
+		return "Name:" + name + ",id:" + id + ",linkUri:" + linkUri;
 	}
 }
