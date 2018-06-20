@@ -57,7 +57,7 @@ public class ApiController implements ONInterface
 	
 	@Override
 	public void initializeNotebook(ONData notebook) {
-		collector.setNotebookQuery("/notebooks/" + notebook.getID());
+		collector.setNotebookID(notebook.getID());
 	}
 
 	
@@ -65,7 +65,7 @@ public class ApiController implements ONInterface
 	@Override
 	public ArrayList<ONData> getNotebooks() {
 		try {
-			HttpsResponse response = client.getONContent("/notebooks?select=" + this.notebookSelectParameters , accessToken, this.jsonContentType);
+			HttpsResponse response = client.getONContent("/notebooks?select=" + this.notebookSelectParameters , this.accessToken, this.jsonContentType);
 			return collector.createONData(collector.parseJSON(response));
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -89,19 +89,29 @@ public class ApiController implements ONInterface
 	
 	@Override
 	public ArrayList<ONData> searchPage(String pageName) {
+		String[] split = pageName.split(" ");
+		pageName = split[0];
+		for (int i = 1; i < split.length; i++)
+		{
+			pageName += "%" + "20" + split[i];
+		}
+		
 		String query = collector.buildPageFilterQuery(pageName, this.pageSelectParameters);
+		HttpsResponse response = null;
 		try {
-			return collector.createONData(collector.parseJSON(client.getONContent(query, this.accessToken, "json")));
+			//System.out.println(this.accessToken);
+			response = client.getONContent(query, this.accessToken, this.jsonContentType);
+			
 		} catch (Exception e) {
 			System.out.println(e.getMessage() + ": Some Problem uccured while interacting with Microsoft Graph");
 		}
-		return null; 
+		return collector.createONData(collector.parseJSON(response)); 
 	}
 
 	
 	//##GETTER METHODES''//-------------------------------------------------------------------------------------------------------
 	
-	public String getNotebookQuery()	{
-		return collector.getNotebookQuery();
+	public String getNotebookID()	{
+		return collector.getNotebookID();
 	}
 }
