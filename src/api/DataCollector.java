@@ -11,7 +11,7 @@ import ONData.ONData;;
 
 public class DataCollector {
 	
-	private String notebookQuery;
+	private String notebookID;
 	
 	/**
 	 * Parses the Response when requesting an authorization token 
@@ -76,7 +76,7 @@ public class DataCollector {
 	 */
 	public String buildPageFilterQuery(String name, String selectParameters)
 	{
-		return (notebookQuery + "/pages?filter=title%20eq%20'" + name + "'&select=" + selectParameters);
+		return "/pages?expand=parentNotebook(select=id)&filter=title%20eq%20'" + name + "'%20and%20parentNotebook/id%20eq%20'" + notebookID + "'&select=" + selectParameters ;
 	}
 	
 	
@@ -123,7 +123,7 @@ public class DataCollector {
 		//Clean the String from '{', '}', '"' and then split at ":" which will split the String into "link" | "oneNoteClientUrl" | "href" | the ONClientUri we are looking for | Rest
 		//Meaning we will have to return the String at third place to get the oneNoteClientUrl we are looking for
 		String[] data = jsonLinks.replaceAll("\\{|\\}|\"", "").split(":");	
-		return data[3];
+		return data[4];
 	}
 	
 	
@@ -149,15 +149,22 @@ public class DataCollector {
 			for (int j = 0; j < variableValuePairs.length; j++)
 				{
 					String[] split = variableValuePairs[j].split(":");
-					System.out.println(split[0] + split[1]);
-					if (split[0] == "links")	
+					System.out.println(split[0] + ":" + split[1]);
+					if (split[0].equals("title"))
+					{
+						map.put("name", split[1]);
+					}
+					if (split[0].equals("displayName"))
+					{
+						map.put("name", split[1]);
+					}
+					if (split[0].equals("links"))	
 					{
 						map.put(split[0], parseLinkUrl(variableValuePairs[j]));
 					}	else	{
 						map.put(split[0], split[1]);
 					}
 				}
-			System.out.println(map.toString());
 			//Add the HashMap to the ArrayList
 			hashList.add(i, map);
 		}	
@@ -179,6 +186,7 @@ public class DataCollector {
 		ArrayList<ONData> dataList = new ArrayList<ONData>();
 		for (Iterator<HashMap<String,String>> e = keyValueMap.iterator(); e.hasNext(); ) {
 			HashMap<String,String> element = e.next();
+			/*
 			for (Iterator<String> iter = element.keySet().iterator(); iter.hasNext();)
 			{
 				if (element.containsKey("links"))	{
@@ -187,18 +195,19 @@ public class DataCollector {
 					dataList.add(new ONData(element.get(iter.next()), element.get(iter.next()), null));
 				}
 			}
+			*/
+			dataList.add(new ONData(element.get("name"), element.get("id"), element.get("links")));
 		}
-		System.out.println(dataList.get(0).toString());
 		return dataList;
 	}
 	
 	
-	public void setNotebookQuery(String notebookQuery)	{
-		this.notebookQuery = notebookQuery;
+	public void setNotebookID(String notebookID)	{
+		this.notebookID = notebookID;
 	}
 	
-	public String getNotebookQuery()
+	public String getNotebookID()
 	{
-		return this.notebookQuery;
+		return this.notebookID;
 	}
 }

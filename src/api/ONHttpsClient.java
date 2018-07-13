@@ -1,6 +1,7 @@
 package api;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -87,9 +88,10 @@ public class ONHttpsClient {
 	}
 	
 	
-	public HttpsResponse getONContent(String querry, String accessToken, String contentType) throws Exception
+	public HttpsResponse getONContent(String querry, String accessToken, String contentType) throws IOException
 	{
 		URL obj = new URL(serviceRootUri + querry);
+		System.out.println(querry);
 		HttpsURLConnection con = (HttpsURLConnection) obj.openConnection();
 
 		// optional default is GET
@@ -116,6 +118,8 @@ public class ONHttpsClient {
 		//return the response as a String
 		return new HttpsResponse(responseCode, response.toString());
 	}
+	
+
 	
 	public void openONContent(String url, Desktop desktop) throws Exception
 	{

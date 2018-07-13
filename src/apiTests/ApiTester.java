@@ -64,19 +64,24 @@ class ApiTester {
 	{
 		setup();
 		ArrayList<ONData> notebooks = api.getNotebooks();
+		notebooks = api.getNotebooks();
 		for (Iterator<ONData> iter = notebooks.iterator(); iter.hasNext();)
 		{
 			ONData data = iter.next();
-			System.out.println(data.getName().equals("TestBook"));
+			System.out.println(data.toString());
 			if (data.getName().equals("TestBook"))
 			{
 				api.initializeNotebook(data);
+				assertEquals(data.getID(), api.getNotebookID());
 			}
-			assertEquals("/notebooks/" + data.getID(), api.getNotebookQuery());
 		}
 		scanner.close();
 		//Testing searchPage Flow
 		ArrayList<ONData> pages = api.searchPage("Nice Handshake");
+		for (Iterator<ONData> iter = pages.iterator(); iter.hasNext();)
+		{
+			System.out.println(iter.next().toString());
+		}
 		assertEquals("Nice Handshake", pages.get(0).getName());
 	}
 }
