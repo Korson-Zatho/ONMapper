@@ -4,8 +4,8 @@ import java.awt.Desktop;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import Exceptions.*;
-import ONData.ONData;
+import exceptions.*;
+import onData.ONData;
 
 public class ApiController implements ONInterface
 {

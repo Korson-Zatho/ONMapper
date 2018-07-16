@@ -2,8 +2,8 @@ package api;
 
 import java.util.ArrayList;
 
-import Exceptions.InvalidStateException;
-import ONData.ONData;
+import exceptions.InvalidStateException;
+import onData.ONData;
 
 public interface ONInterface {
 	
