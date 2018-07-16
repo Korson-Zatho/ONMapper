@@ -9,8 +9,8 @@ import java.util.Scanner;
 import org.junit.Before;
 import org.junit.jupiter.api.Test;
 
-import ONData.ONData;
 import api.ApiController;
+import ONData.ONData;
 
 class ApiTester {
 

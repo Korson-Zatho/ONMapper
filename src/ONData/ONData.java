@@ -49,6 +49,6 @@ public class ONData {
 	
 	public String toString()
 	{
-		return name + ";" + id + ";" + linkUri;
+		return "Name:" + name + ",id:" + id + ",linkUri:" + linkUri;
 	}
 }

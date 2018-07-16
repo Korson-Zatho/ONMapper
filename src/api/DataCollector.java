@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 
-import Exceptions.*;
+import exceptions.*;
 import ONData.ONData;;
 
 public class DataCollector {
