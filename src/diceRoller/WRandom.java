@@ -4,6 +4,12 @@ import java.util.Random;
 
 public class WRandom {	
 
+	public static void main(String[] args)
+	{
+		WRandom random = new WRandom();
+		System.out.println(random.rollRNG());
+	}
+	
 	private int R = 32;
 	private int M1 = 3;
 	private int M2 = 24;
@@ -30,12 +36,12 @@ public class WRandom {
 	}
 	
 	private int mat0pos(int t,int v) {
-		return v ^ (v >> t);
+		return (v^(v>>t));
 	}
 	
 	private int mat0neg(int t, int v)
 	{
-		return v ^ (v << (-t));
+		return (v^(v<<(-(t))));
 	}
 	
 	private int getV0()
@@ -83,7 +89,7 @@ public class WRandom {
 		newV1 = z1 ^ z2;
 		newV0 = mat0neg(-11, z0) ^ mat0neg(-7,z1) ^ mat0neg(-13, z2);
 		state_i = (state_i + 31) & constantAnd;
-		return ((double) state_R[state_i] * fact);
+		return ((double) state_R[state_i]);
 	}
 	
 	
