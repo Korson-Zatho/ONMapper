@@ -1,8 +1,9 @@
 package diceRoller;
 
 import java.util.HashMap;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.Iterator;
+import java.util.LinkedList;
+
 
 public class DiceRollParser {
 
@@ -24,11 +25,11 @@ public class DiceRollParser {
 	public static void main(String[] args)
 	{
 		DiceRollParser parser = new DiceRollParser();
-		String input = "1d20 acid + 2d4";
+		String input = "3d6 + 1d4 + 5 piercing + 1d4 acid";
 		parser.evaluateDmgTypes(input);
 	}
 	
-	private WRandom random = new WRandom();
+	private WRandom random = new WRandom(Integer.MAX_VALUE);
 	
 	
 	/**
@@ -59,11 +60,45 @@ public class DiceRollParser {
 	public HashMap<String, Integer> evaluateDmgTypes(String input)
 	{
 		HashMap<String, Integer> dmgMapping = new HashMap<String, Integer>();
+		LinkedList<String> operators = new LinkedList<>();
 		
 		//split the String at the dmg types so at specific words defined above but in lowerCase
-		input.trim();
+		input = input.trim();
+		System.out.println(input);
+		//split at whitespaces 
+
+		String[] splits = input.split(" ");
 		
-		input.indexOf("[a-zA-Z]{2,}");
+		//here we search matches of a dmgType if we found one, we evaluate the statement
+		int start = 0;
+		for (int i = 0; i < splits.length; i++) {
+			if (splits[i].matches("[a-zA-Z]{2,}")) {
+				System.out.println(splits[i]);
+				String statement = "";
+				for (int j = start; j < i; j++) {
+					statement += splits[j];
+				}
+				if (i+1 < splits.length) {
+					if (splits[i+1].matches("[+-]")) {
+						operators.add(splits[i+1]);
+						start = i+2;
+					} else {
+						start = i+1;
+					}
+				}
+				dmgMapping.put(splits[i], parseStatement(statement));
+			}
+		}
+		
+		//add everthing to a total
+		Iterator<String> dmg = dmgMapping.keySet().iterator();
+		int total = dmgMapping.get(dmg.next());
+		for (String each : operators) {
+			total = parseStatement(total + each + dmgMapping.get(dmg.next()));
+		}
+		dmgMapping.put("total", total);
+		
+		System.out.println(dmgMapping);
 		
 		
 		return dmgMapping;

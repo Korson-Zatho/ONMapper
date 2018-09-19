@@ -4,10 +4,12 @@ import java.util.Random;
 
 public class WRandom {	
 
-	public static void main(String[] args)
-	{
-		WRandom random = new WRandom();
-		System.out.println(random.rollRNG());
+	public static void main (String[] args) {
+		WRandom rand = new WRandom(5);
+		for (int i = 0; i < 100; i++) {
+			System.out.println(rand.rollRNG());
+			
+		}
 	}
 	
 	private int R = 32;
@@ -18,19 +20,17 @@ public class WRandom {
 	
 	private int state_i = 0;
 	private int[] state_R = new int[R];
-	private int newV0;
-	private int newV1;
 	private int z0, z1, z2;
 	
 	private double fact = 2.32830643653869628906e-10;
 	
-	public WRandom()
+	public WRandom(int input)
 	{
 		Random rand = new Random();
 		int[] start = new int[32];
 		for (int i = 0; i < 32; i++)
 		{
-			start[i] = rand.nextInt();
+			start[i] = rand.nextInt(input);
 		}
 		initialise(start);
 	}
@@ -77,8 +77,6 @@ public class WRandom {
 		{
 			state_R[j] = init[j];
 		}
-		newV0 = state_R[(state_i + 31) ^ constantAnd];
-		newV1 = state_R[state_i];
 	}
 	
 	public double rollRNG()
@@ -86,31 +84,27 @@ public class WRandom {
 		z0 = getVRm1();
 		z1 = getV0() ^ mat0pos(8, getVM1());
 		z2 = mat0neg(-19, getVM2()) ^ mat0neg(-14, getVM3());
-		newV1 = z1 ^ z2;
-		newV0 = mat0neg(-11, z0) ^ mat0neg(-7,z1) ^ mat0neg(-13, z2);
+		state_R[state_i] = z1 ^ z2;
+		state_R[(state_i + 31) & constantAnd] = mat0neg(-11, z0) ^ mat0neg(-7,z1) ^ mat0neg(-13, z2);
 		state_i = (state_i + 31) & constantAnd;
-		return ((double) state_R[state_i]);
+		return ((double) state_R[state_i] * fact);
 	}
 	
+    public int rollDX(int inputs)
+    {
+        double value = Math.abs(rollRNG());
+        double spaces = 0.5 /(double) inputs;
+        for (int i = 0; i < inputs; i++) {
+            if (value >= spaces * i && value < spaces * (i + 1)) {
+            	//+1 because it is form 0 to inputs excluding inputs put we want
+            	//from 1 to inputs including inputs
+                return i+1;
+            }
+        }
+        return (int) inputs+1;
+    }
 	
-	public int rollDX(double dice)
-	{
-		double rolled = rollRNG();
-		if (rolled < 0) 
-		{
-			rolled = Math.abs(rolled * 2.0);
-		}
-		for (int i = 1; i <= dice; i++)
-		{
-			if (rolled < (1.0/dice) * i)
-			{
-				return i;
-			}
-		}
-		return -1;
-	}
-	
-	public int rollXDX(double amount, double dice)
+	public int rollXDX(int amount, int dice)
 	{
 		int sum = 0;
 		for (int i = 0; i < amount; i++)
