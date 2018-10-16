@@ -25,8 +25,11 @@ public class DiceRollParser {
 	public static void main(String[] args)
 	{
 		DiceRollParser parser = new DiceRollParser();
-		String input = "3d6 + 1d4 + 5 piercing + 1d4 acid";
-		parser.evaluateDmgTypes(input);
+		String input = "4d4 + 2 piercing + 1d4 acid";
+		HashMap<String, Integer> map = new HashMap<String, Integer>();
+		map.put("piercing", 2);
+		map.put("acid", 0);
+		parser.evaluateDmgTypes(input, map);
 	}
 	
 	private WRandom random = new WRandom(Integer.MAX_VALUE);
@@ -57,7 +60,7 @@ public class DiceRollParser {
 	 * @param input
 	 * @return A HashMap String->Integer that maps from dmgType to dmgAmount.
 	 */
-	public HashMap<String, Integer> evaluateDmgTypes(String input)
+	public HashMap<String, Integer> evaluateDmgTypes(String input, HashMap<String, Integer> resistance)
 	{
 		HashMap<String, Integer> dmgMapping = new HashMap<String, Integer>();
 		LinkedList<String> operators = new LinkedList<>();
@@ -86,7 +89,17 @@ public class DiceRollParser {
 						start = i+1;
 					}
 				}
-				dmgMapping.put(splits[i], parseStatement(statement));
+				if (resistance.containsKey(splits[i])) {
+					
+					int factor = resistance.get(splits[i]);
+					if (factor != 0) {
+						dmgMapping.put(splits[i], Math.floorDiv(parseStatement(statement), factor));
+					} else {
+						dmgMapping.put(splits[i], 0);
+					}
+				} else {
+					dmgMapping.put(splits[i], parseStatement(statement));
+				}
 			}
 		}
 		
