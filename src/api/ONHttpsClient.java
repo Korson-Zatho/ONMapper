@@ -35,6 +35,7 @@ public class ONHttpsClient {
 	 * 
 	 * Opens default browser with accessTokenUri to let the user log himself into his Microsoft-Account
 	 * and then agree to the scopes ONMapper needs access to.
+	 * This is the first step of the authentication process.
 	 */
 	public void requestCode(Desktop desktop) throws Exception
 	{
@@ -47,6 +48,9 @@ public class ONHttpsClient {
 	 * @param authorizationCode - The authorizationCode acquired in the first step of the authorization flow
 	 * @return A HttpsRespons containing the responsCode and responsString
 	 * @throws Exception
+	 * 
+	 * Make a POST-Request with the authorizationCode acquired in the first authorization step.
+	 * The response is going to contain an access-Token giving you access to Microsoft OneNote Files.
 	 */
 	public HttpsResponse requestAccessToken(String authorizationCode) throws Exception {
 					 
@@ -87,7 +91,14 @@ public class ONHttpsClient {
 		return new HttpsResponse(responseCode, response.toString());
 	}
 	
-	
+	/**
+	 * 
+	 * @param querry - That contains commands for the Microsoft Server
+	 * @param accessToken - For authentication
+	 * @param contentType - For getting oneNote entities "application/json" is used. For getting Page Content "text/html" is used
+	 * @return
+	 * @throws IOException
+	 */
 	public HttpsResponse getONContent(String querry, String accessToken, String contentType) throws IOException
 	{
 		URL obj = new URL(serviceRootUri + querry);

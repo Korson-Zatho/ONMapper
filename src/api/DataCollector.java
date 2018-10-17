@@ -1,7 +1,5 @@
 package api;
 
-import static org.junit.jupiter.api.Assumptions.assumingThat;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -15,7 +13,9 @@ public class DataCollector {
 	
 	/**
 	 * Parses the Response when requesting an authorization token 
-	 * Builds HashMap so can be used to return all keyValuePairs sent by Microsoft not just the token
+	 * Builds HashMap to allow returning all keyValuePairs sent by Microsoft not just the token, but
+	 * this method just returns the access_token in the response.
+	 * 
 	 * @param response The HttpsResponse from the Azure AD Authorize endpoint
 	 * @return Filters the authorizationToken from the HttpsResponse
 	 */
@@ -40,6 +40,8 @@ public class DataCollector {
 	
 	
 	/**
+	 * This Method takes a URI and creates a HashMap<String,String> containing the query variables as keys and their
+	 * values as values.
 	 * 
 	 * @return A HashMap<String,String> which has the name of the variable as the Key and 
 	 * the Value of the variable as Value.
@@ -123,17 +125,24 @@ public class DataCollector {
 		//Clean the String from '{', '}', '"' and then split at ":" which will split the String into "link" | "oneNoteClientUrl" | "href" | the ONClientUri we are looking for | Rest
 		//Meaning we will have to return the String at third place to get the oneNoteClientUrl we are looking for
 		String[] data = jsonLinks.replaceAll("\\{|\\}|\"", "").split(":");	
-		return data[4];
+		return data[3] + ":" + data[4] + ":" + data[5];
 	}
 	
 	
-	
+	/**
+	 * Creates a list of HashMaps that contain the keys "name", "links", "id" mapping on their values in the Json from the response
+	 * 
+	 * @param response - A response from a Get requests for OneNotes entities.
+	 * @return
+	 */
 	public ArrayList<HashMap<String,String>> parseJSON(HttpsResponse response)
 	{
 		//Split the JSON into Strings which each represent 1 ONData entity
+		System.out.println("JsonCode : " + response.getResponseString() );
 		String data = response.getResponseString().split("\\[")[1];
+		System.out.println(data);
 		String[] onDataStrings = data.split("\\}\\},\\{");
-				
+		
 		//Now split each of those representative Strings into their variable-value pair
 		//And create a new List of HashMaps to store them in to be returned.
 		ArrayList<HashMap<String,String>> hashList = new ArrayList<HashMap<String,String>>();
@@ -141,7 +150,9 @@ public class DataCollector {
 		{
 			//Clean each String from '{', '}', '"' and then split the variable-value pairs
 			String[] variableValuePairs = onDataStrings[i].replaceAll("\\{|\\}|\"|\\]", "").split(",");	
-			
+			for (String each : variableValuePairs) {
+				System.out.println(each);
+			}
 			//create a new HashMap object for the array of variable-value pairs
 			//then go through each entry of variableValuePairs and split at ":"
 			//then put the split Key-Value pair into the HashMap as Key and Value
@@ -149,7 +160,6 @@ public class DataCollector {
 			for (int j = 0; j < variableValuePairs.length; j++)
 				{
 					String[] split = variableValuePairs[j].split(":");
-					System.out.println(split[0] + ":" + split[1]);
 					if (split[0].equals("title"))
 					{
 						map.put("name", split[1]);

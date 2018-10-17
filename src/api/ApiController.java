@@ -109,7 +109,7 @@ public class ApiController implements ONInterface
 	}
 
 	
-	//##GETTER METHODES''//-------------------------------------------------------------------------------------------------------
+	//##GETTER METHODES##//-------------------------------------------------------------------------------------------------------
 	
 	public String getNotebookID()	{
 		return collector.getNotebookID();
